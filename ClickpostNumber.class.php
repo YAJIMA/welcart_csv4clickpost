@@ -137,7 +137,46 @@ class CLICKPOST_NUMBER
 		';
 	}
 
-	public function system_js() {
+    public function order_list_page_js() {
+        $_wp_http_referer = urlencode(wp_unslash( $_SERVER['REQUEST_URI'] ));
+        $wc_nonce = wp_create_nonce( 'admin_system' );
+        $html = '
+		$("#cp_upload_dialog").dialog({
+			bgiframe: true,
+			autoOpen: false,
+			title: "データ取込",
+			height: 360,
+			width: 600,
+			modal: true,
+			buttons: {
+				'.__('close', 'usces').': function() {
+					$(this).dialog("close");
+				}
+			},
+			close: function() {}
+		});
+		$("#up_cpcsv").click(function() {
+			$("#cp_upload_dialog").dialog( "open" );
+		});
+		$("#dl_cpcsv").click(function() {
+			if( $("input[name*=\'listcheck\']:checked").length == 0 ) {
+				alert("'.__('Choose the data.', 'usces').'");
+				$("#oederlistaction").val("");
+				return false;
+			}
+			var listcheck = "";
+			$("input[name*=\'listcheck\']").each(function(i) {
+				if( $(this).attr("checked") ) {
+					listcheck += "&listcheck["+i+"]="+$(this).val();
+				}
+			});
+			location.href = "'.USCES_ADMIN_URL.'?page=usces_orderlist&order_action=dl_cpcsv"+listcheck+"&noheader=true&_wp_http_referer=' . $_wp_http_referer . '&wc_nonce=' . $wc_nonce . '";
+		});
+		';
+        echo $html;
+    }
+
+    public function system_js() {
 ?>
 	<script type="text/javascript">
 		jQuery(function($){
@@ -179,6 +218,151 @@ class CLICKPOST_NUMBER
 		';
         echo $html;
     }
+
+    public function upload_tracking_number() {
+        global $wpdb, $usces;
+
+        check_admin_referer( 'admin_system', 'wc_nonce' );
+        // Upload
+        $path = WP_CONTENT_DIR.'/uploads/';
+        if( isset($_REQUEST['action']) && $_REQUEST['action'] == 'cpupload' ) {
+            $workfile = $_FILES["usces_upcsv"]["tmp_name"];
+            if( !is_uploaded_file( $workfile ) ) {
+                $res['status'] = 'error';
+                $res['message'] = __('The file was not uploaded.', 'usces');
+                $url = USCES_ADMIN_URL.'?page=usces_orderlist&usces_status='.$res['status'].'&usces_message='.urlencode( $res['message'] );
+                wp_redirect( $url );
+                exit;
+            }
+
+            list( $fname, $fext ) = explode( '.', $_FILES["usces_upcsv"]["name"], 2 );
+            if( $fext != 'csv' ) {
+                $res['status'] = 'error';
+                $res['message'] =  __('The file is not supported.', 'usces')."(".$_FILES["usces_upcsv"]["name"].")";
+                $url = USCES_ADMIN_URL.'?page=usces_orderlist&usces_status='.$res['status'].'&usces_message='.urlencode( $res['message'] );
+                wp_redirect( $url );
+                exit;
+            }
+
+            $new_filename = $fname.'_'.time().'.'.$fext;
+            $upload_file = $path.mb_convert_encoding($new_filename, "SJIS", "UTF-8");
+            if( !move_uploaded_file( $workfile, $upload_file ) ) {
+                $res['status'] = 'error';
+                $res['message'] =  __('The file was not stored.', 'usces')."(".$_FILES["usces_upcsv"]["name"].")";
+                $url = USCES_ADMIN_URL.'?page=usces_orderlist&usces_status='.$res['status'].'&usces_message='.urlencode( $res['message'] );
+                wp_redirect( $url );
+                exit;
+            }
+            return $new_filename;
+        }
+    }
+
+    public function register_tracking_number() {
+        global $wpdb, $usces;
+
+        //check_admin_referer( 'admin_system', 'wc_nonce' );
+        // cp_register
+        $path = WP_CONTENT_DIR.'/uploads/';
+        $file_name = '';
+        $reg_file = '';
+        if( isset($_REQUEST['cp_regfile']) && !WCUtils::is_blank($_REQUEST['cp_regfile']) && isset($_REQUEST['order_action']) && $_REQUEST['order_action'] == 'cp_register' ) {
+            $file_name = $_REQUEST['cp_regfile'];
+            $reg_file = $path.mb_convert_encoding($file_name, "SJIS", "UTF-8");
+            if( !file_exists( $reg_file ) ) {
+                $res['status'] = 'error';
+                $res['message'] =  __('CSV file does not exist.', 'usces').esc_html( $file_name );
+                return( $res );
+            }
+        }
+
+        $wpdb->query( 'SET SQL_BIG_SELECTS=1' );
+        set_time_limit( 3600 );
+
+        define( 'CP_tracking_number', 3 );//荷物配送番号
+        define( 'CP_tracking_DATE', 4 );//出荷日付
+        define( 'CP_ORDER_ID', 0 );//Welcart受注番号
+
+        $orglines = array();
+        $sp = ',';
+        $total_num = 0;
+        $comp_num = 0;
+        $err_num = 0;
+        $res = array();
+
+        if( !( $fpo = fopen( $reg_file, "r" ) ) ) {
+            $res['status'] = 'error';
+            $res['message'] = __('A file does not open.', 'usces').esc_html( $file_name );
+            return $res;
+        }
+
+        $fname_parts = explode( '.', $reg_file );
+        if( 'csv' !== end( $fname_parts ) ) {
+            $res['status'] = 'error';
+            $res['message'] = __('This file is not in the CSV file.', 'usces').esc_html( $file_name );
+            return $res;
+
+        } else {
+            $buf = '';
+            while( !feof($fpo) ) {
+                $temp = fgets( $fpo, 10240 );
+                if( 0 == strlen($temp) ) continue;
+                $orglines[] = str_replace( '"', '', $temp );
+            }
+        }
+        fclose( $fpo );
+
+        $total_num = count( $orglines );
+
+        $pre_id = 0;
+        foreach( $orglines as $line ) {
+            $data = explode( $sp, $line );
+            $cp_order_id = mb_convert_encoding($data[CP_ORDER_ID], 'UTF-8', 'SJIS');
+            $boids = explode( '__', $cp_order_id, 2 );
+            if( isset($boids[1]) )
+                $group_id = $boids[1];
+            else
+                $group_id = false;
+
+            $order_id = $this->get_order_id_from_dec( $boids[0] );
+            $tracking_number = trim(mb_convert_encoding($data[CP_tracking_number], 'UTF-8', 'SJIS'));
+            $order_data = $usces->get_order_data( $order_id );
+            if( $order_data ) {
+                if( false !== $group_id ){
+                    $group_value = unserialize($usces->get_order_meta_value( ('group_'.$group_id), $order_id ));
+                    $group_value['delivery_company'] = 'クリックポスト';
+                    $group_value['tracking_number'] = $tracking_number;
+                    $usces->set_order_meta_value( ('group_'.$group_id), serialize($group_value), $order_id );
+                }else{
+                    if( $pre_id != $order_id ){
+                        $usces->del_order_meta( 'tracking_number', $order_id );
+                    }
+                    $current_tracking = $usces->get_order_meta_value( 'tracking_number', $order_id );
+                    if( !empty($current_tracking) ){
+                        if( false === strpos($current_tracking, $tracking_number) ){
+                            $tracking_number = $current_tracking . ',' . $tracking_number;
+                        }
+                    }
+                    $usces->set_order_meta_value( 'tracking_number', $tracking_number, $order_id );
+                    $usces->set_order_meta_value( 'delivery_company', 'クリックポスト', $order_id );
+                }
+
+                do_action( 'wcyncp_action_tracking_number_set', $order_data, $group_id, $tracking_number );
+
+                $comp_num++;
+
+            } else {
+                $err_num++;
+            }
+            $pre_id = $order_id;
+        }
+
+        $res['status'] = 'success';
+        $res['message'] = sprintf(__('%2$s of %1$s lines registration completion, error on %3$s lines.', 'usces'), $total_num, $comp_num, $err_num);
+        unlink( $reg_file );
+
+        return $res;
+    }
+
     public function after_cart_instant() {
         if( isset($_REQUEST['page']) && $_REQUEST['page'] == 'usces_cp_tracking' && isset($_REQUEST['action']) && $_REQUEST['action'] == 'cpupload' ) {
             check_admin_referer( 'admin_system', 'wc_nonce' );
@@ -189,7 +373,7 @@ class CLICKPOST_NUMBER
         }
     }
 
-	public function get_order_id_from_dec( $dec_order_id ) {
+    public function get_order_id_from_dec( $dec_order_id ) {
 		global $wpdb;
 		$order_meta_table_name = $wpdb->prefix."usces_order_meta";
 		$order_id = $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM $order_meta_table_name WHERE meta_key = %s AND meta_value = %s LIMIT 1", 'dec_order_id', $dec_order_id ) );
