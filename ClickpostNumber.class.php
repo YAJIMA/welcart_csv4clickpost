@@ -172,6 +172,16 @@ class CLICKPOST_NUMBER
 		}
 	}
 
+    public function after_cart_instant() {
+        if( isset($_REQUEST['page']) && $_REQUEST['page'] == 'usces_cp_tracking' && isset($_REQUEST['action']) && $_REQUEST['action'] == 'cpupload' ) {
+            check_admin_referer( 'admin_system', 'wc_nonce' );
+            $filename = self::upload_tracking_number();
+            $url = USCES_ADMIN_URL.'?page=usces_orderlist&usces_status=none&usces_message=&order_action=cp_register&cp_regfile='.$filename;
+            wp_redirect( $url );
+            exit;
+        }
+    }
+
 	public function get_order_id_from_dec( $dec_order_id ) {
 		global $wpdb;
 		$order_meta_table_name = $wpdb->prefix."usces_order_meta";
