@@ -1,11 +1,11 @@
 <?php
 /**
 Plugin Name: CSV Export for Click Post
-Plugin URI: https://www.welcart.com/
+Plugin URI: https://github.com/YAJIMA/welcart_csv4clickpost
 Description: このプラグインは Welcart とクリックポストとの連携プラグインです。Welcart 本体と一緒にご利用ください。
 Version: 1.0.0
-Author: HatchBit & Co.
-Author URI: https://www.hatchbit.jp/
+Author: YAJIMA Yuichiro
+Author URI: https://www.lancers.jp/profile/yajima8818
 **/
 
 if( !defined( 'ABSPATH' ) ) {
