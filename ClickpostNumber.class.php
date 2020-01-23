@@ -409,7 +409,7 @@ class CLICKPOST_NUMBER
 		global $usces;
 		check_admin_referer( 'admin_system', 'wc_nonce' );
 
-		$filename = "kuronekoyamato".current_time('YmdHis').".csv";
+		$filename = "Clickpost-".current_time('YmdHis').".csv";
 		$ids = $_GET['listcheck'];
 
 		$billing_code = self::$opts['billing_code'];
@@ -540,13 +540,13 @@ class CLICKPOST_NUMBER
 
 						$ldata = array(
                             'お届け先郵便番号' => str_replace( '-', '', $destination_info['msa_zip']),
-                            'お届け先氏名' => mb_substr(mb_convert_kana($destination_info['msa_name'], 'A')."　".mb_convert_kana($destination_info['msa_name2'], 'A'),0,16 ),
+                            'お届け先氏名' => mb_substr(mb_convert_kana($destination_info['msa_name'], 'A')."　".mb_convert_kana($destination_info['msa_name2'], 'A'),0,20 ),
                             'お届け先敬称' => '様',
-                            'お届け先住所1行目' => mb_substr(mb_convert_kana($destination_info['msa_pref'].$destination_info['msa_address1'], 'A'),0,32 ),
-                            'お届け先住所2行目' => mb_substr(mb_convert_kana($destination_info['msa_address2'], 'A'),0,16 ),
-                            'お届け先住所3行目' => mb_substr(mb_convert_kana($destination_info['msa_company'], 'A'),0,16 ),
+                            'お届け先住所1行目' => mb_substr(mb_convert_kana($destination_info['msa_pref'].$destination_info['msa_address1'], 'A'),0,20 ),
+                            'お届け先住所2行目' => mb_substr(mb_convert_kana($destination_info['msa_address2'], 'A'),0,20 ),
+                            'お届け先住所3行目' => mb_substr(mb_convert_kana($destination_info['msa_company'], 'A'),0,20 ),
                             'お届け先住所4行目' => '',
-                            '内容品' => mb_substr($cart[0]['item_name'],0,25 ) . (isset($cart[1]) ? 'その他' : '')
+                            '内容品' => mb_substr($cart[0]['item_name'],0,12 ) . (isset($cart[1]) ? 'その他' : '')
 						);
 						$line_data = apply_filters( 'wcyncp_filter_outcsv_data', $ldata, $order_id, $data, $cart );
 						foreach( $line_data as $lkey => $lvalue ){
@@ -565,13 +565,13 @@ class CLICKPOST_NUMBER
 
 					$ldata = array(
                         'お届け先郵便番号' => str_replace( '-', '', $delivery['zipcode']),
-                        'お届け先氏名' => mb_substr(mb_convert_kana($delivery['name1']."　".$delivery['name2'], 'A'),0,16 ),
+                        'お届け先氏名' => mb_substr(mb_convert_kana($delivery['name1']."　".$delivery['name2'], 'A'),0,20 ),
                         'お届け先敬称' => '様',
-                        'お届け先住所1行目' => mb_substr(mb_convert_kana($delivery['pref'].$delivery['address1'], 'A'),0,32 ),
-                        'お届け先住所2行目' => mb_substr(mb_convert_kana($delivery['address2'], 'A'),0,16 ),
-                        'お届け先住所3行目' => mb_substr(mb_convert_kana($delivery['address3'], 'A'),0,16 ),
+                        'お届け先住所1行目' => mb_substr(mb_convert_kana($delivery['pref'].$delivery['address1'], 'A'),0,20 ),
+                        'お届け先住所2行目' => mb_substr(mb_convert_kana($delivery['address2'], 'A'),0,20 ),
+                        'お届け先住所3行目' => mb_substr(mb_convert_kana($delivery['address3'], 'A'),0,20 ),
                         'お届け先住所4行目' => '',
-                        '内容品' => mb_substr($cart[0]['item_name'],0,25 ) . (isset($cart[1]) ? 'その他' : '')
+                        '内容品' => mb_substr($cart[0]['item_name'],0,12 ) . (isset($cart[1]) ? 'その他' : '')
 					);
 					$line_data = apply_filters( 'wcyncp_filter_outcsv_data', $ldata, $order_id, $data, $cart );
 					foreach( $line_data as $lkey => $lvalue ){
