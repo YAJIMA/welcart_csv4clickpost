@@ -172,6 +172,13 @@ class CLICKPOST_NUMBER
 		}
 	}
 
+    public function order_list_footer() {
+        $html = '
+		<div id="cp_upload_dialog">
+		</div>
+		';
+        echo $html;
+    }
     public function after_cart_instant() {
         if( isset($_REQUEST['page']) && $_REQUEST['page'] == 'usces_cp_tracking' && isset($_REQUEST['action']) && $_REQUEST['action'] == 'cpupload' ) {
             check_admin_referer( 'admin_system', 'wc_nonce' );
