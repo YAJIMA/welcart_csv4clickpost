@@ -41,6 +41,7 @@ class CLICKPOST_NUMBER
 		$options = get_option('usces_ex');
 
 		$options['system']['clickpostcsv']['activate_flag'] = !isset($options['system']['clickpostcsv']['activate_flag']) ? 0 : (int)$options['system']['clickpostcsv']['activate_flag'];
+        $options['system']['clickpostcsv']['name_code'] = !isset($options['system']['clickpostcsv']['name_code']) ? 'item_name' : trim($options['system']['clickpostcsv']['name_code']);
 
 		update_option( 'usces_ex', $options );
 		self::$opts = $options['system']['clickpostcsv'];
@@ -57,6 +58,7 @@ class CLICKPOST_NUMBER
 
 			$usces->stripslashes_deep_post($_POST);
 			self::$opts['activate_flag'] = isset($_POST['cp_activate_flag']) ? (int)$_POST['cp_activate_flag'] : 0;
+            self::$opts['name_code'] = isset($_POST['cp_name_code']) ? trim($_POST['cp_name_code']) : '';
 
 			$options = get_option('usces_ex');
 			$options['system']['clickpostcsv'] = self::$opts;
@@ -78,10 +80,17 @@ class CLICKPOST_NUMBER
 		<table class="form_table">
 			<tr height="35">
 				<th class="system_th"><a style="cursor:pointer;" onclick="toggleVisibility('ex_cp_activate_flag');"><?php _e('Activation', 'usces'); ?></a></th>
-				<td width="10"><input name="cp_activate_flag" id="cp_activate_flag0" type="radio" value="0"<?php if(self::$opts['activate_flag'] === 0) echo 'checked="checked"'; ?> /></td><td width="100"><label for="cp_activate_flag0"><?php _e('disable', 'usces'); ?></label></td>
-				<td width="10"><input name="cp_activate_flag" id="cp_activate_flag1" type="radio" value="1"<?php if(self::$opts['activate_flag'] === 1) echo 'checked="checked"'; ?> /></td><td><label for="cp_activate_flag1"><?php _e('enable', 'usces'); ?></label></td>
+				<td width="10"><input name="cp_activate_flag" id="cp_activate_flag0" type="radio" value="0"<?php if(self::$opts['activate_flag'] === 0) echo 'checked="checked"'; ?> /></td>
+                <td width="100"><label for="cp_activate_flag0"><?php _e('disable', 'usces'); ?></label></td>
+				<td width="10"><input name="cp_activate_flag" id="cp_activate_flag1" type="radio" value="1"<?php if(self::$opts['activate_flag'] === 1) echo 'checked="checked"'; ?> /></td>
+                <td><label for="cp_activate_flag1"><?php _e('enable', 'usces'); ?></label></td>
 				<td><div id="ex_cp_activate_flag" class="explanation">クリックポスト用のCSV出力機能を有効化します。</div></td>
 			</tr>
+            <tr height="35">
+                <th class="system_th"><a style="cursor:pointer;" onclick="toggleVisibility('ex_cp_name_code');">品名に出力する項目</a></th>
+                <td width="10" colspan="4"><input name="cp_name_code" id="cp_name_code" type="text" value="<?php esc_attr_e(self::$opts['name_code']); ?>" /></td>
+                <td><div id="ex_cp_name_code" class="explanation">ラベルの「品名」欄に使用するコード。 item_name / item_code / sku_code </div></td>
+            </tr>
 		</table>
 		<hr />
 		<input name="usces_cp_option_update" type="submit" class="button button-primary" value="<?php _e('change decision','usces'); ?>" />
@@ -546,7 +555,7 @@ class CLICKPOST_NUMBER
                             'お届け先住所2行目' => mb_substr(mb_convert_kana($destination_info['msa_address2'], 'A'),0,20 ),
                             'お届け先住所3行目' => mb_substr(mb_convert_kana($destination_info['msa_company'], 'A'),0,20 ),
                             'お届け先住所4行目' => '',
-                            '内容品' => mb_substr($cart[0]['item_name'],0,12 ) . (isset($cart[1]) ? 'その他' : '')
+                            '内容品' => mb_substr($cart[0][self::$opts['name_code']],0,12 ) . (isset($cart[1]) ? '..他' : '')
 						);
 						$line_data = apply_filters( 'wcyncp_filter_outcsv_data', $ldata, $order_id, $data, $cart );
 						foreach( $line_data as $lkey => $lvalue ){
@@ -571,7 +580,7 @@ class CLICKPOST_NUMBER
                         'お届け先住所2行目' => mb_substr(mb_convert_kana($delivery['address2'], 'A'),0,20 ),
                         'お届け先住所3行目' => mb_substr(mb_convert_kana($delivery['address3'], 'A'),0,20 ),
                         'お届け先住所4行目' => '',
-                        '内容品' => mb_substr($cart[0]['item_name'],0,12 ) . (isset($cart[1]) ? 'その他' : '')
+                        '内容品' => mb_substr($cart[0][self::$opts['name_code']],0,12 ) . (isset($cart[1]) ? '..他' : '')
 					);
 					$line_data = apply_filters( 'wcyncp_filter_outcsv_data', $ldata, $order_id, $data, $cart );
 					foreach( $line_data as $lkey => $lvalue ){
