@@ -445,9 +445,9 @@ class CLICKPOST_NUMBER
 		);
 		$line_header = apply_filters( 'wcyncp_filter_outcsv_header', $ldata );
 		foreach( $line_header as $lkey => $lvalue ){
-			$line .= '"'.$lkey.'",';
+			$line .= $lkey.',';
 		}
-		rtrim( $line, ',' );
+		$line = rtrim( $line, ',' );
 		$line .= "\r\n";
 
 
@@ -559,9 +559,9 @@ class CLICKPOST_NUMBER
 						);
 						$line_data = apply_filters( 'wcyncp_filter_outcsv_data', $ldata, $order_id, $data, $cart );
 						foreach( $line_data as $lkey => $lvalue ){
-							$line .= '"'.$lvalue.'",';
+							$line .= $lvalue.',';
 						}
-						rtrim( $line, ',' );
+                        $line = rtrim( $line, ',' );
 						$line .= "\r\n";
 					}
 				}
@@ -584,9 +584,9 @@ class CLICKPOST_NUMBER
 					);
 					$line_data = apply_filters( 'wcyncp_filter_outcsv_data', $ldata, $order_id, $data, $cart );
 					foreach( $line_data as $lkey => $lvalue ){
-						$line .= '"'.$lvalue.'",';
+                        $line .= $lvalue.',';
 					}
-					rtrim( $line, ',' );
+					$line = rtrim( $line, ',' );
 					$line .= "\r\n";
 				}
 			}
