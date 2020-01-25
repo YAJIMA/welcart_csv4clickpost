@@ -11,6 +11,7 @@
 ## インストール方法
 
 1. ZIPファイルでダウンロードします。  
+* バージョンを選択してダウンロードしたい場合は、[Releasesページ](https://github.com/YAJIMA/welcart_csv4clickpost/releases)から選択可能です。  
 ![download_zip](https://user-images.githubusercontent.com/3177471/73037783-a8b88100-3e93-11ea-917e-fc26b04f21b8.jpg)
 
 2. Wordpress管理画面のプラグイン新規追加から **1でダウンロードしたZIPファイル**をアップロードします。  
