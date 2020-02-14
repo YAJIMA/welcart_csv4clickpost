@@ -58,7 +58,7 @@ class CLICKPOST_NUMBER
 
 			$usces->stripslashes_deep_post($_POST);
 			self::$opts['activate_flag'] = isset($_POST['cp_activate_flag']) ? (int)$_POST['cp_activate_flag'] : 0;
-            self::$opts['name_code'] = isset($_POST['cp_name_code']) ? trim($_POST['cp_name_code']) : '';
+            self::$opts['name_code'] = isset($_POST['cp_name_code']) ? sanitize_text_field($_POST['cp_name_code']) : '';
 
 			$options = get_option('usces_ex');
 			$options['system']['clickpostcsv'] = self::$opts;
