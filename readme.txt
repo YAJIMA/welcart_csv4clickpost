@@ -40,6 +40,9 @@ Check the checkbox of the target order information.
 
 == Changelog ==
 
+= 1.1.2 =
+* properly sanitized, as we required
+
 = 1.1.1 =
 * Renewed README.
 

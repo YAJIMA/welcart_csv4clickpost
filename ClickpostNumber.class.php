@@ -1,7 +1,7 @@
 <?php
 /**
 CSV Export for Click Post
-Version: 1.1.0
+Version: 1.1.2
 Author: HatchBit & Co.
 **/
 
@@ -116,14 +116,14 @@ class CLICKPOST_NUMBER
 
 	public function order_list_action_status($status) {
 		if( isset( $_GET['usces_status'] ) && !empty( $_GET['usces_status'] ) ){
-			$status = $_GET['usces_status'];
+			$status = sanitize_text_field($_GET['usces_status']);
 		}
 		return $status;
 	}
 
 	public function order_list_action_message($message) {
 		if( isset( $_GET['usces_message'] ) && !empty( $_GET['usces_message'] ) ){
-			$message = $_GET['usces_message'];
+			$message = sanitize_text_field($_GET['usces_message']);
 		}
 		return $message;
 	}
@@ -254,7 +254,7 @@ class CLICKPOST_NUMBER
 		check_admin_referer( 'admin_system', 'wc_nonce' );
 
 		$filename = "Clickpost-".current_time('YmdHis').".csv";
-		$ids = $_GET['listcheck'];
+		$ids = sanitize_text_field($_GET['listcheck']);
 
 		$billing_code = self::$opts['billing_code'];
 		$kind_code = self::$opts['kind_code'];
