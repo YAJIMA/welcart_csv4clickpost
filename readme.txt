@@ -3,8 +3,8 @@ Contributors: hatchbitco
 Donate link: https://www.hatchbit.jp/
 Tags: e-commerce, export
 Requires at least: 5.3.2
-Tested up to: 5.3.2
-Stable tag: 5.3.2
+Tested up to: 5.4
+Stable tag: 5.4
 Requires PHP: 7.1.2
 License: MIT
 License URI: https://opensource.org/licenses/mit-license.php
@@ -40,6 +40,9 @@ Check the checkbox of the target order information.
 
 == Changelog ==
 
+= 1.1.3 =
+* Fix order ID array processing
+
 = 1.1.2 =
 * properly sanitized, as we required
 
@@ -56,6 +59,9 @@ Check the checkbox of the target order information.
 * Initial version.
 
 == Upgrade Notice ==
+
+= 1.1.3 =
+This version fixes a security related bug.  Upgrade immediately.
 
 = 1.1.1 =
 This version fixes a security related bug.  Upgrade immediately.

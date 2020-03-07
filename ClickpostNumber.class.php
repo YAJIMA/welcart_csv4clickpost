@@ -1,7 +1,7 @@
 <?php
 /**
 CSV Export for Click Post
-Version: 1.1.2
+Version: 1.1.3
 Author: HatchBit & Co.
 **/
 
@@ -254,7 +254,10 @@ class CLICKPOST_NUMBER
 		check_admin_referer( 'admin_system', 'wc_nonce' );
 
 		$filename = "Clickpost-".current_time('YmdHis').".csv";
-		$ids = sanitize_text_field($_GET['listcheck']);
+
+		foreach ($_GET['listcheck'] as $item) {
+            $ids[] = sanitize_text_field($item);
+        }
 
 		$billing_code = self::$opts['billing_code'];
 		$kind_code = self::$opts['kind_code'];
